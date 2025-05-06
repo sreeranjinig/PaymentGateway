@@ -16,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class PaymentUtil {
 
+  private static final String PAYMENT_GATEWAY_URL = "http://localhost:8080/payments";
+  private static final String EXCEPTION_MESSAGE = "Bank payment service unavailable";
   private final RestTemplate restTemplate;
 
   @Autowired
@@ -33,14 +35,13 @@ public class PaymentUtil {
       HttpHeaders headers = new HttpHeaders();
       HttpEntity<PostPaymentRequest> entity = new HttpEntity<>(paymentRequest, headers);
 
-      ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/payments",
-          entity, String.class);
+      ResponseEntity<String> response = restTemplate.postForEntity(PAYMENT_GATEWAY_URL, entity, String.class);
       String jsonBody = response.getBody();
       ObjectMapper mapper = new ObjectMapper();
 
       return mapper.readTree(jsonBody);
     } catch (JsonProcessingException | HttpServerErrorException.ServiceUnavailable e) {
-      throw new EventProcessingException("Bank payment service unavailable");
+      throw new EventProcessingException(EXCEPTION_MESSAGE);
     }
   }
 

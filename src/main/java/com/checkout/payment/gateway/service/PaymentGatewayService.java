@@ -6,7 +6,6 @@ import com.checkout.payment.gateway.model.GetPaymentResponse;
 import com.checkout.payment.gateway.model.PostPaymentRequest;
 import com.checkout.payment.gateway.model.PostPaymentResponse;
 import com.checkout.payment.gateway.repository.PaymentsRepository;
-import com.checkout.payment.gateway.repository.entity.Payment;
 import com.checkout.payment.gateway.util.PaymentUtil;
 import java.util.UUID;
 import org.slf4j.Logger;
