@@ -27,6 +27,11 @@ public class PaymentGatewayService {
     this.paymentUtil = paymentUtil;
   }
 
+  /**
+   * Retrieves the payment for the corresponding id
+   * @param id
+   * @return GetPaymentResponse
+   */
   public GetPaymentResponse getPaymentById(UUID id) {
     LOG.debug("Requesting access to to payment with ID {}", id);
     return paymentsRepository.findByPaymentId(id)
@@ -34,6 +39,13 @@ public class PaymentGatewayService {
         .orElseThrow(() -> new EventProcessingException("Payment with id " + id + " not found"));
   }
 
+  /**
+   * Method for submitting the payment request to payment gateway and saving the payment details to repository.
+   * Payment status is updated based on the response from the payment gateway
+   *
+   * @param paymentRequest : PostPaymentRequest send to the payment gateway
+   * @return Package
+   */
   public PostPaymentResponse processPayment(PostPaymentRequest paymentRequest) {
     LOG.debug("Creating a new payment");
     Payment payment = PaymentMapper.MAPPER.mapToPayment(paymentRequest,paymentUtil.callBankApi(paymentRequest));
