@@ -1,39 +1,49 @@
 package com.checkout.payment.gateway.mapper;
 
+import java.util.UUID;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.model.GetPaymentResponse;
 import com.checkout.payment.gateway.model.PostPaymentRequest;
 import com.checkout.payment.gateway.model.PostPaymentResponse;
 import com.checkout.payment.gateway.repository.entity.Payment;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, imports = {PaymentStatus.class})
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, imports = {
+    PaymentStatus.class})
 public interface PaymentMapper {
 
   PaymentMapper MAPPER = Mappers.getMapper(PaymentMapper.class);
 
-  @Mapping(target ="status", source = "paymentStatus", qualifiedByName ="mapToPaymentStatus")
-  @Mapping(target ="cardNumberLastFour", source ="cardNumber")
-  @Mapping(target="expiryMonth", source = "expiryMonth", qualifiedByName = "mapMonthToString")
-  @Mapping(target="expiryYear", source = "expiryYear", qualifiedByName = "mapYearToString")
+  @Mapping(target = "status", source = "paymentStatus", qualifiedByName = "mapToPaymentStatus")
+  @Mapping(target = "cardNumberLastFour", source = "cardNumber")
+  @Mapping(target = "expiryMonth", source = "expiryMonth", qualifiedByName = "mapMonthToString")
+  @Mapping(target = "expiryYear", source = "expiryYear", qualifiedByName = "mapYearToString")
   GetPaymentResponse mapToGetPaymentResponse(Payment payment);
 
-  @Mapping(target ="status", source = "paymentStatus", qualifiedByName ="mapToPaymentStatus")
-  @Mapping(target ="cardNumberLastFour", source ="cardNumber")
-  @Mapping(target="expiryMonth", source = "expiryMonth", qualifiedByName = "mapMonthToString")
-  @Mapping(target="expiryYear", source = "expiryYear", qualifiedByName = "mapYearToString")
+  @Mapping(target = "status", source = "paymentStatus", qualifiedByName = "mapToPaymentStatus")
+  @Mapping(target = "cardNumberLastFour", source = "cardNumber")
+  @Mapping(target = "expiryMonth", source = "expiryMonth", qualifiedByName = "mapMonthToString")
+  @Mapping(target = "expiryYear", source = "expiryYear", qualifiedByName = "mapYearToString")
   PostPaymentResponse mapToPostPaymentResponse(Payment payment);
 
-  @Mapping(target ="cardNumber", source ="paymentRequest.cardNumber", qualifiedByName = "maskCardNumber")
-  @Mapping(target ="paymentStatus", expression = "java(mapBooleanToStatus(status))")
-  Payment mapToPayment(PostPaymentRequest paymentRequest, boolean status);
+  @Mapping(target = "cardNumber", source = "paymentRequest.cardNumber", qualifiedByName = "maskCardNumber")
+  @Mapping(target = "paymentStatus", expression = "java(mapBooleanToStatus(paymentResponse))")
+  @Mapping(target = "id", expression = "java(mapAuthorizedId(paymentResponse))")
+  Payment mapToPayment(PostPaymentRequest paymentRequest, JsonNode paymentResponse);
 
-  default String mapBooleanToStatus(boolean value) {
-    return value ? PaymentStatus.AUTHORIZED.getName() : PaymentStatus.DECLINED.getName();
+  default String mapBooleanToStatus(JsonNode paymentResponse) {
+    return paymentResponse.path("authorized").asBoolean() ? PaymentStatus.AUTHORIZED.getName()
+        : PaymentStatus.DECLINED.getName();
+  }
+
+  default UUID mapAuthorizedId(JsonNode paymentResponse) {
+    return !paymentResponse.path("authorization_code").isEmpty() ?
+        UUID.fromString(paymentResponse.path("authorization_code").asText()) : UUID.randomUUID();
   }
 
   @Named("mapMonthToString")
