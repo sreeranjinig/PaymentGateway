@@ -17,6 +17,9 @@ import com.checkout.payment.gateway.repository.entity.Payment;
 import com.checkout.payment.gateway.util.PaymentUtil;
 import java.util.Optional;
 import java.util.UUID;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,7 +64,7 @@ class PaymentGatewayServiceTest {
 
 
   @Test
-  void processPaymentTestSuccess() {
+  void processPaymentTestSuccess() throws JsonProcessingException {
 
     PostPaymentRequest postPaymentRequest = new PostPaymentRequest();
     postPaymentRequest.setAmount(10);
@@ -71,7 +74,9 @@ class PaymentGatewayServiceTest {
     postPaymentRequest.setCardNumber("1111222233334444");
     postPaymentRequest.setCvv("123");
 
-    when(paymentUtil.callBankApi(any(PostPaymentRequest.class))).thenReturn(true);
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode mockNode = objectMapper.readTree("{\"authorized\":true, \"authorization_code\":\"083d3cbb-5db5-4995-89f6-9f339e7e5660\"}");
+    when(paymentUtil.callBankApi(any(PostPaymentRequest.class))).thenReturn(mockNode);
     Payment paymentRequest =new Payment(UUID.randomUUID(), PaymentStatus.AUTHORIZED.getName(),
         "************4444", 01, 2030, "GBP", 100);
     when(paymentsRepository.save(any(Payment.class))).thenReturn(Optional.of(paymentRequest));
@@ -81,7 +86,7 @@ class PaymentGatewayServiceTest {
   }
 
   @Test
-  void processPaymentTestFailure(){
+  void processPaymentTestFailure() throws JsonProcessingException {
 
     PostPaymentRequest postPaymentRequest = new PostPaymentRequest();
     postPaymentRequest.setCurrency("USD");
@@ -89,6 +94,9 @@ class PaymentGatewayServiceTest {
     postPaymentRequest.setExpiryYear(2024);
     postPaymentRequest.setCardNumber("1111222233334444");
     postPaymentRequest.setCvv("123");
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode mockNode = objectMapper.readTree("{\"authorized\":true, \"authorization_code\":\"083d3cbb-5db5-4995-89f6-9f339e7e5660\"}");
+    when(paymentUtil.callBankApi(any(PostPaymentRequest.class))).thenReturn(mockNode);
 
     Exception ex = assertThrows(EventProcessingException.class, () ->
         paymentGatewayService.processPayment(postPaymentRequest));
