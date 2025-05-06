@@ -3,6 +3,7 @@ package com.checkout.payment.gateway.util;
 import com.checkout.payment.gateway.exception.EventProcessingException;
 import com.checkout.payment.gateway.model.PostPaymentRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -27,7 +28,7 @@ public class PaymentUtil {
    *
    * @return boolean
    */
-  public boolean callBankApi(PostPaymentRequest paymentRequest) throws EventProcessingException {
+  public JsonNode callBankApi(PostPaymentRequest paymentRequest) throws EventProcessingException {
     try {
       HttpHeaders headers = new HttpHeaders();
       HttpEntity<PostPaymentRequest> entity = new HttpEntity<>(paymentRequest, headers);
@@ -37,7 +38,7 @@ public class PaymentUtil {
       String jsonBody = response.getBody();
       ObjectMapper mapper = new ObjectMapper();
 
-      return mapper.readTree(jsonBody).path("authorized").asBoolean();
+      return mapper.readTree(jsonBody);
     } catch (JsonProcessingException | HttpServerErrorException.ServiceUnavailable e) {
       throw new EventProcessingException("Bank payment service unavailable");
     }
