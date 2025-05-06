@@ -19,7 +19,16 @@ imposters/ - contains the bank simulator configuration. Don't change this
 docker-compose.yml - configures the bank simulator
 
 
-## API Documentation
+## Testing
+
+1. PaymentGatewayControllerTest
+2. PaymentGatewayServiceTest
+3. Manual Tests - Completed manual test with the help of bank simulator provided
+
+## Assumptions
+
+1. Integration base modules will be implemented, so that we are open for modification.
+2. Have introduced repository laye, so that its easy to adapt later  
 
 ## Areas of Improvement
 
