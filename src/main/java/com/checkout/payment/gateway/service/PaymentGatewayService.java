@@ -48,9 +48,7 @@ public class PaymentGatewayService {
    */
   public PostPaymentResponse processPayment(PostPaymentRequest paymentRequest) {
     LOG.debug("Creating a new payment");
-    Payment payment = PaymentMapper.MAPPER.mapToPayment(paymentRequest,paymentUtil.callBankApi(paymentRequest));
-    payment.setId(UUID.randomUUID());
-    return paymentsRepository.save(payment)
+    return paymentsRepository.save(PaymentMapper.MAPPER.mapToPayment(paymentRequest,paymentUtil.callBankApi(paymentRequest)))
         .map(PaymentMapper.MAPPER::mapToPostPaymentResponse)
         .orElseThrow(() -> new EventProcessingException("Payment not created"));
   }
