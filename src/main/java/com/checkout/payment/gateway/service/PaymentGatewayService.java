@@ -44,7 +44,7 @@ public class PaymentGatewayService {
    * Payment status is updated based on the response from the payment gateway
    *
    * @param paymentRequest : PostPaymentRequest send to the payment gateway
-   * @return Package
+   * @return PostPaymentResponse
    */
   public PostPaymentResponse processPayment(PostPaymentRequest paymentRequest) {
     LOG.debug("Creating a new payment");
